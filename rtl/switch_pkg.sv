@@ -29,10 +29,28 @@ typedef struct packed {
     logic [15:0] length;
 } pkt_header_t;
 
+// Flow steering action
+typedef enum logic {
+  ACTION_FORWARD = 1'b0,
+  ACTION_DROP    = 1'b1
+} action_t;
+
+// TCAM entry struct
+typedef struct packed {
+  logic [9:0]  value;
+  logic [9:0]  mask;
+  logic [1:0]  egress_port;
+  action_t     action;
+  logic [3:0]  rule_priority;
+  logic        valid;
+} tcam_entry_t;
+
 //Parameters
 parameter int FLIT_WIDTH = 64;
 parameter int VOQ_DEPTH = 16;
 parameter int NUM_PORTS = 4;
+parameter int TCAM_DEPTH  = 64;
+parameter int MATCH_WIDTH = 10;
 
 
 endpackage
