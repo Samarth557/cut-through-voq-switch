@@ -1,8 +1,5 @@
 interface packet_if #(parameter int FLIT_WIDTH = 64) (input logic clk, rst_n);
 
-    import switch_pkg::*;
-
-
     logic                    valid;
     logic                    ready;
     logic [FLIT_WIDTH-1:0]   data;
