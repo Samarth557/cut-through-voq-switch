@@ -20,9 +20,12 @@
 //==============================================================================
 
 module flow_steering_table
-  import switch_pkg::*;
-#(parameter int DEPTH     = TCAM_DEPTH, parameter int KEY_WIDTH = MATCH_WIDTH)
-  (
+  import switch_pkg::*; #(
+    
+    parameter int DEPTH     = TCAM_DEPTH, 
+    parameter int KEY_WIDTH = MATCH_WIDTH
+)(
+
   input  logic                      clk,
   input  logic                      rst_n,
   // Lookup port
