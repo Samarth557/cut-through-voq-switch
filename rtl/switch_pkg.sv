@@ -1,3 +1,23 @@
+//==============================================================================
+// File: switch_pkg.sv
+// Project: Cut-Through VOQ Switch
+// Author: Samarth Gupta
+// Date: 2026-05-27
+//
+// Description:
+//   Shared package for the cut-through VOQ switch. Defines all types,
+//   structs, enums, and parameters used across RTL modules.
+//
+// Contents:
+//   - port_id_t    : 4-port identifier enum
+//   - priority_t   : 4-level QoS priority enum (P0-P3)
+//   - fwd_mode_t   : forwarding mode enum (cut-through / store-and-forward)
+//   - action_t     : flow steering action enum (forward / drop)
+//   - pkt_header_t : parsed header struct (dest_addr, pkt_priority, length)
+//   - tcam_entry_t : TCAM flow rule struct (value, mask, egress, action, rpri)
+//   - Parameters   : FLIT_WIDTH, VOQ_DEPTH, NUM_PORTS, TCAM_DEPTH, MATCH_WIDTH
+//==============================================================================
+
 package switch_pkg;
 
 //Port names

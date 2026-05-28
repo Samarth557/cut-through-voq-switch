@@ -1,3 +1,26 @@
+//==============================================================================
+// File: tcam.sv
+// Project: Cut-Through VOQ Switch
+// Author: Samarth Gupta
+// Date: 2026-05-27
+//
+// Description:
+//   Ternary Content Addressable Memory (TCAM) primitive for the flow
+//   steering table. Stores 64 flow rules and performs parallel comparison
+//   of the lookup key against all entries simultaneously in one cycle.
+//
+// Features:
+//   - 64-entry storage (TCAM_DEPTH parameter)
+//   - 10-bit match key: {dest_addr[7:0], pkt_priority[1:0]}
+//   - Ternary matching — each bit can be 0, 1, or X (don't care) via mask
+//   - Parallel compare — all 64 entries checked simultaneously
+//   - match_vector output — one bit per entry, high if entry matched
+//   - match_priority output — rule_priority per entry for priority encoder
+//   - Read port — winning_index in, winning_egress_port and action out
+//   - Runtime programmable via write port (wr_en, wr_addr, wr_data)
+//   - Asynchronous active-low reset clears all entry valid bits
+//==============================================================================
+
 module tcam
   import switch_pkg::*;
 #(parameter int DEPTH     = TCAM_DEPTH, parameter int KEY_WIDTH = MATCH_WIDTH)

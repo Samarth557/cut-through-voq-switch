@@ -1,3 +1,21 @@
+//==============================================================================
+// File: priority_encoder.sv
+// Project: Cut-Through VOQ Switch
+// Author: Samarth Gupta
+// Date: 2026-05-27
+//
+// Description:
+//   Combinational priority encoder for the flow steering table. Receives
+//   the match_vector and match_priority array from the TCAM and selects
+//   the index of the highest-priority matching entry.
+//
+// Features:
+//   - Scans all 64 match_vector bits in parallel (unrolled in synthesis)
+//   - Selects entry with highest rule_priority among all matching entries
+//   - match_found output — low when match_vector is all zeros (miss)
+//   - winning_index output — 6-bit index of the winning TCAM entry
+//==============================================================================
+
 module priority_encoder
   import switch_pkg::*;
 #(

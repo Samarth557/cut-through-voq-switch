@@ -1,3 +1,22 @@
+//==============================================================================
+// File: header_parser.sv
+// Project: Cut-Through VOQ Switch
+// Author: Samarth Gupta
+// Date: 2026-05-27
+//
+// Description:
+//   Pipeline stage 1. Extracts dest_addr, pkt_priority, and length from
+//   the first flit (SOP) of every incoming packet. Asserts header_valid
+//   one cycle after SOP is detected.
+//
+// Features:
+//   - Single-cycle header extraction — decision available cycle after SOP
+//   - Combinational field extraction — no additional latency on data path
+//   - Registered header_valid — gives downstream logic full clock period
+//   - Uses packet_if.slave modport for clean interface connectivity
+//   - Asynchronous active-low reset
+//==============================================================================
+
 module header_parser  (
 
   input  logic                    clk,
