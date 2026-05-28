@@ -9,6 +9,9 @@ module tcam
   input  logic                      wr_en,
   input  logic [$clog2(DEPTH)-1:0]  wr_addr,
   input  tcam_entry_t               wr_data,
+  input  logic [$clog2(DEPTH)-1:0]  winning_index,
+  output logic [1:0]                winning_egress_port,
+  output action_t                   winning_action,
   output logic [DEPTH-1:0]          match_vector,
   output logic [3:0]                match_priority [DEPTH]
 );
@@ -36,5 +39,8 @@ module tcam
       end
     end
   end
+
+  assign winning_egress_port = entries[winning_index].egress_port;
+  assign winning_action      = entries[winning_index].action;
 
 endmodule : tcam
