@@ -1,4 +1,4 @@
-//==============================================================================
+//=============================================================================================
 // File: switch_pkg.sv
 // Project: Cut-Through VOQ Switch
 // Author: Samarth Gupta
@@ -15,8 +15,8 @@
 //   - action_t     : flow steering action enum (forward / drop)
 //   - pkt_header_t : parsed header struct (dest_addr, pkt_priority, length)
 //   - tcam_entry_t : TCAM flow rule struct (value, mask, egress, action, rpri)
-//   - Parameters   : FLIT_WIDTH, VOQ_DEPTH, NUM_PORTS, TCAM_DEPTH, MATCH_WIDTH
-//==============================================================================
+//   - Parameters   : FLIT_WIDTH, VOQ_DEPTH, NUM_PORTS, TCAM_DEPTH, MATCH_WIDTH, MAX_PKT_FLITS
+//=============================================================================================
 
 package switch_pkg;
 
@@ -71,6 +71,7 @@ parameter int VOQ_DEPTH = 16;
 parameter int NUM_PORTS = 4;
 parameter int TCAM_DEPTH  = 64;
 parameter int MATCH_WIDTH = 10;
+parameter int MAX_PKT_FLITS = 64;
 
 
 endpackage
