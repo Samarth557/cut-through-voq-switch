@@ -15,6 +15,7 @@
 //   - Explicit 3-state FSM per ingress port (IDLE, FORWARDING, DROPPING)
 //   - DROP action support — payload flits discarded without VOQ write
 //   - Oversized packet detection — drops packets exceeding MAX_PKT_FLITS
+//   - VOQ overflow detection — drops packet cleanly when VOQ full mid-packet
 //   - full/empty status per VOQ for arbiter and backpressure
 //   - Parameterised depth (VOQ_DEPTH) and port count (NUM_PORTS)
 //==============================================================================
@@ -53,7 +54,7 @@ module voq_buffer
   output logic [NUM_PORTS-1:0]          pkt_error
 );
 
-  // FSM - combinational logic
+  // FSM - combinational logic - for each ingress port
   typedef enum logic [1:0] {
     IDLE       = 2'd0,
     FORWARDING = 2'd1,
@@ -89,7 +90,13 @@ module voq_buffer
           FORWARDING: begin
             if (in_valid[i]) begin
               flit_count[i] <= flit_count[i] + 1;
+              // Oversized packet — drops remaining flits
               if (flit_count[i] >= MAX_PKT_FLITS - 1) begin
+                state[i]     <= DROPPING;
+                pkt_error[i] <= 1'b1;
+              end
+              // VOQ overflow — drops packet cleanly rather than corrupting it
+              if (full[i][current_egress[i]]) begin
                 state[i]     <= DROPPING;
                 pkt_error[i] <= 1'b1;
               end
