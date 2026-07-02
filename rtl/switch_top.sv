@@ -59,12 +59,12 @@ module switch_top
   logic                   grant_valid [NUM_PORTS];
 
   // Cut-through controller outputs 
-  logic [NUM_PORTS-1:0]   pop         [NUM_PORTS];
-  logic                   ct_out_valid[NUM_PORTS];
-  logic [FLIT_WIDTH-1:0]  ct_out_data [NUM_PORTS];
-  logic                   ct_out_sop  [NUM_PORTS];
-  logic                   ct_out_eop  [NUM_PORTS];
-  fwd_mode_t              fwd_mode    [NUM_PORTS];
+  logic [NUM_PORTS-1:0]   pop          [NUM_PORTS];
+  logic                   ct_out_tvalid[NUM_PORTS];
+  logic [FLIT_WIDTH-1:0]  ct_out_tdata [NUM_PORTS];
+  logic                   ct_out_sop   [NUM_PORTS];
+  logic                   ct_out_tlast [NUM_PORTS];
+  fwd_mode_t              fwd_mode     [NUM_PORTS];
 
   // Ingress interface wires
   logic [NUM_PORTS-1:0]   in_valid_w;
@@ -76,7 +76,7 @@ module switch_top
   // arb_empty[j][i]    = voq_empty[i][j]    — column j of empty array
   // arb_priority[j][i] = priority of VOQ[i][j] head flit
   // ct_flit_in[j][i]   = flit_out[i][j]     — column j of flit_out array
-  // eop_to_arb[j][i]   = ct_out_eop[j] && grant[j][i]
+  // eop_to_arb[j][i]   = ct_out_tlast[j] && grant[j][i]
   logic [NUM_PORTS-1:0]   arb_empty    [NUM_PORTS];
   priority_t              arb_priority [NUM_PORTS][NUM_PORTS];
   logic [FLIT_WIDTH-1:0]  ct_flit_in   [NUM_PORTS][NUM_PORTS];
@@ -100,7 +100,7 @@ module switch_top
         assign ct_flit_in[sj][si]   = flit_out[si][sj];
         assign ct_empty[sj][si]     = voq_empty[si][sj];
         // EOP to arbiter — high on granted port when EOP fires
-        assign eop_to_arb[sj][si]   = ct_out_eop[sj] && grant[sj][si];
+        assign eop_to_arb[sj][si]   = ct_out_tlast[sj] && grant[sj][si];
       end
     end
   endgenerate
@@ -185,20 +185,20 @@ module switch_top
         .grant_valid  (grant_valid[ct]),
         .flit_in      (ct_flit_in[ct]),
         .empty        (ct_empty[ct]),
-        .egress_ready (egress_if[ct].ready),
-        .out_valid    (ct_out_valid[ct]),
-        .out_data     (ct_out_data[ct]),
+        .egress_ready (egress_if[ct].tready),
+        .out_tvalid   (ct_out_tvalid[ct]),
+        .out_tdata    (ct_out_tdata[ct]),
         .out_sop      (ct_out_sop[ct]),
-        .out_eop      (ct_out_eop[ct]),
+        .out_tlast    (ct_out_tlast[ct]),
         .pop          (pop[ct]),
         .fwd_mode     (fwd_mode[ct])
       );
 
       // Connect to egress interface
-      assign egress_if[ct].valid        = ct_out_valid[ct];
-      assign egress_if[ct].data         = ct_out_data[ct];
+      assign egress_if[ct].tvalid       = ct_out_tvalid[ct];
+      assign egress_if[ct].tdata        = ct_out_tdata[ct];
       assign egress_if[ct].sop          = ct_out_sop[ct];
-      assign egress_if[ct].eop          = ct_out_eop[ct];
+      assign egress_if[ct].tlast        = ct_out_tlast[ct];
       assign egress_if[ct].pkt_priority = PRI_0;
     end
   endgenerate

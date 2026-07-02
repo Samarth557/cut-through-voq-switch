@@ -29,13 +29,20 @@ interface packet_if #(parameter int FLIT_WIDTH = 64) (input logic clk, rst_n);
     logic                    valid;
     logic                    ready;
     logic [FLIT_WIDTH-1:0]   data;
-    logic                    sop;
     logic                    eop;
+
+    // Egress-side signals (master modport) — AXI4-Stream naming
+    logic                    tvalid;
+    logic                    tready;
+    logic [FLIT_WIDTH-1:0]   tdata;
+    logic                    tlast;
+
+    logic                    sop;
     switch_pkg::priority_t   pkt_priority;
 
     modport master (
-        input ready,
-        output valid, data, sop, eop, pkt_priority
+        input tready,
+        output tvalid, tdata, sop, tlast, pkt_priority
     );
 
     modport slave (
@@ -45,14 +52,15 @@ interface packet_if #(parameter int FLIT_WIDTH = 64) (input logic clk, rst_n);
 
     clocking master_cb @(posedge clk);
         default input #1 output #1;
-        input ready;
-        output valid, data, sop, eop, pkt_priority;
+        input tready;
+        output tvalid, tdata, sop, tlast, pkt_priority;
     endclocking
 
 
     clocking monitor_cb @(posedge clk);
         default input #1;
-        input valid, ready, data, sop, eop, pkt_priority;
+        input valid, ready, data, sop, eop, pkt_priority,
+              tvalid, tready, tdata, tlast;
     endclocking
 
 endinterface : packet_if

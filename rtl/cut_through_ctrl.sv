@@ -43,10 +43,10 @@ module cut_through_ctrl
   input  logic                          egress_ready,
 
   // Egress output
-  output logic                          out_valid,
-  output logic [FLIT_WIDTH-1:0]         out_data,
+  output logic                          out_tvalid,
+  output logic [FLIT_WIDTH-1:0]         out_tdata,
   output logic                          out_sop,
-  output logic                          out_eop,
+  output logic                          out_tlast,
 
   // Pop signals to VOQ buffer
   output logic [NUM_PORTS-1:0]          pop,
@@ -105,18 +105,18 @@ module cut_through_ctrl
       flit_count   <= '0;
       sf_wr_ptr    <= '0;
       sf_rd_ptr    <= '0;
-      out_valid    <= 1'b0;
-      out_data     <= '0;
+      out_tvalid   <= 1'b0;
+      out_tdata    <= '0;
       out_sop      <= 1'b0;
-      out_eop      <= 1'b0;
+      out_tlast    <= 1'b0;
       pop          <= '0;
       fwd_mode     <= STORE_FWD;
     end else begin
       // Default deassert each cycle
       pop       <= '0;
-      out_valid <= 1'b0;
-      out_sop   <= 1'b0;
-      out_eop   <= 1'b0;
+      out_tvalid <= 1'b0;
+      out_sop    <= 1'b0;
+      out_tlast  <= 1'b0;
 
       case (ct_state)
 
@@ -147,10 +147,10 @@ module cut_through_ctrl
           if (current_valid) begin
             if (egress_ready) begin
               // Forward flit directly to egress
-              out_valid         <= 1'b1;
-              out_data          <= current_flit;
+              out_tvalid        <= 1'b1;
+              out_tdata         <= current_flit;
               out_sop           <= is_sop;
-              out_eop           <= is_eop;
+              out_tlast         <= is_eop;
               pop[granted_port] <= 1'b1;
 
               // Extract length from header flit on SOP
@@ -183,7 +183,7 @@ module cut_through_ctrl
 
         // STORE AND FORWARD 
         CT_STORE_FWD: begin
-          out_valid <= 1'b0;
+          out_tvalid <= 1'b0;
 
           if (current_valid) begin
             sf_buf[sf_wr_ptr[$clog2(MAX_PKT_FLITS)-1:0]] <= current_flit;
@@ -202,10 +202,10 @@ module cut_through_ctrl
         // DRAIN 
         CT_DRAIN: begin
           if (egress_ready && !sf_empty) begin
-            out_valid <= 1'b1;
-            out_data  <= sf_buf[sf_rd_ptr[$clog2(MAX_PKT_FLITS)-1:0]];
-            out_sop   <= (sf_rd_ptr == '0);
-            out_eop   <= sf_last;
+            out_tvalid <= 1'b1;
+            out_tdata  <= sf_buf[sf_rd_ptr[$clog2(MAX_PKT_FLITS)-1:0]];
+            out_sop    <= (sf_rd_ptr == '0);
+            out_tlast  <= sf_last;
             sf_rd_ptr <= sf_rd_ptr + 1;
 
             if (sf_last) begin
