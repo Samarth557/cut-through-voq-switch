@@ -9,23 +9,27 @@
 //   structs, enums, and parameters used across RTL modules.
 //
 // Contents:
-//   - port_id_t    : 4-port identifier enum
+//   - port_id_t    : 8-port identifier enum
 //   - priority_t   : 4-level QoS priority enum (P0-P3)
 //   - fwd_mode_t   : forwarding mode enum (cut-through / store-and-forward)
 //   - action_t     : flow steering action enum (forward / drop)
 //   - pkt_header_t : parsed header struct (dest_addr, pkt_priority, length)
 //   - tcam_entry_t : TCAM flow rule struct (value, mask, egress, action, rpri)
-//   - Parameters   : FLIT_WIDTH, VOQ_DEPTH, NUM_PORTS, TCAM_DEPTH, MATCH_WIDTH, MAX_PKT_FLITS
+//   - Parameters   : FLIT_WIDTH, VOQ_DEPTH, NUM_PORTS (=8 default), TCAM_DEPTH, MATCH_WIDTH, MAX_PKT_FLITS
 //=============================================================================================
 
 package switch_pkg;
 
 //Port names
-typedef enum logic [1:0] { 
-    PORT_0 = 2'd0,
-    PORT_1 = 2'd1,
-    PORT_2 = 2'd2,
-    PORT_3 = 2'd3
+typedef enum logic [2:0] {
+    PORT_0 = 3'd0,
+    PORT_1 = 3'd1,
+    PORT_2 = 3'd2,
+    PORT_3 = 3'd3,
+    PORT_4 = 3'd4,
+    PORT_5 = 3'd5,
+    PORT_6 = 3'd6,
+    PORT_7 = 3'd7
 } port_id_t;
 
 //Priority levels
@@ -59,7 +63,7 @@ typedef enum logic {
 typedef struct packed {
   logic [9:0]  value;
   logic [9:0]  mask;
-  logic [1:0]  egress_port;
+  logic [2:0]  egress_port;
   action_t     action;
   logic [3:0]  rule_priority;
   logic        valid;
@@ -68,7 +72,7 @@ typedef struct packed {
 //Parameters
 parameter int FLIT_WIDTH = 64;
 parameter int VOQ_DEPTH = 16;
-parameter int NUM_PORTS = 4;
+parameter int NUM_PORTS = 8;
 parameter int TCAM_DEPTH  = 64;
 parameter int MATCH_WIDTH = 10;
 parameter int MAX_PKT_FLITS = 64;

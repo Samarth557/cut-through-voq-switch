@@ -17,6 +17,7 @@
 //   - match_vector output — one bit per entry, high if entry matched
 //   - match_priority output — rule_priority per entry for priority encoder
 //   - Read port — winning_index in, winning_egress_port and action out
+//   - 3-bit winning_egress_port — supports up to NUM_PORTS=8 egress ports
 //   - Runtime programmable via write port (wr_en, wr_addr, wr_data)
 //   - Asynchronous active-low reset clears all entry valid bits
 //==============================================================================
@@ -36,7 +37,7 @@ module tcam
   input  logic [$clog2(DEPTH)-1:0]  wr_addr,
   input  tcam_entry_t               wr_data,
   input  logic [$clog2(DEPTH)-1:0]  winning_index,
-  output logic [1:0]                winning_egress_port,
+  output logic [2:0]                winning_egress_port,
   output action_t                   winning_action,
   output logic [DEPTH-1:0]          match_vector,
   output logic [3:0]                match_priority [DEPTH]

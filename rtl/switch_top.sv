@@ -10,11 +10,11 @@
 //   Uses pre-sliced intermediate arrays for clean instantiation.
 //
 // Submodules instantiated:
-//   - header_parser      x4  (one per ingress port)
-//   - flow_steering_table x4 (one per ingress port, shared TCAM write port)
-//   - voq_buffer         x1  (shared 4x4 FIFO array)
-//   - qos_arbiter        x4  (one per egress port)
-//   - cut_through_ctrl   x4  (one per egress port)
+//   - header_parser      x8  (one per ingress port)
+//   - flow_steering_table x8 (one per ingress port, shared TCAM write port)
+//   - voq_buffer         x1  (shared 8x8 FIFO array)
+//   - qos_arbiter        x8  (one per egress port)
+//   - cut_through_ctrl   x8  (one per egress port)
 //==============================================================================
 
 module switch_top
@@ -46,7 +46,7 @@ module switch_top
   pkt_header_t parsed_header [NUM_PORTS];
 
   // Flow steering outputs 
-  logic [1:0]  fst_egress_port [NUM_PORTS];
+  logic [2:0]  fst_egress_port [NUM_PORTS];
   action_t     fst_action      [NUM_PORTS];
 
   // VOQ buffer outputs

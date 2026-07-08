@@ -14,6 +14,7 @@
 //   - TCAM-based wildcard matching on {dest_addr, pkt_priority}
 //   - Programmable flow rules with per-rule priority (0-15)
 //   - Actions: ACTION_FORWARD to egress port or ACTION_DROP
+//   - 3-bit egress_port output — steers to up to NUM_PORTS=8 egress ports
 //   - hit/miss outputs for error handling and SVA assertions
 //   - Runtime programmable via RAL model in UVM environment
 //   - Single-cycle lookup latency
@@ -37,7 +38,7 @@ module flow_steering_table
   input  logic [$clog2(DEPTH)-1:0]  wr_addr,
   input  tcam_entry_t               wr_data,
 
-  output logic [1:0]                egress_port,
+  output logic [2:0]                egress_port,
   output action_t                   action,
   output logic                      hit,
   output logic                      miss

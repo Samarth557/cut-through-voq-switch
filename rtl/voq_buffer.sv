@@ -11,7 +11,7 @@
 //   independent queues per {ingress, egress} pair.
 //
 // Features:
-//   - 4x4 array of synchronous FIFOs (16 total, one per {ingress,egress} pair)
+//   - NUM_PORTS x NUM_PORTS array of synchronous FIFOs (NUM_PORTS^2 total, one per {ingress,egress} pair)
 //   - Explicit 3-state FSM per ingress port (IDLE, FORWARDING, DROPPING)
 //   - DROP action support — payload flits discarded without VOQ write
 //   - Oversized packet detection — drops packets exceeding MAX_PKT_FLITS
@@ -39,7 +39,7 @@ module voq_buffer
 
   // Flow steering results
   input  logic [NUM_PORTS-1:0]          header_valid,
-  input  logic [1:0]                    egress_port  [NUM_PORTS],
+  input  logic [2:0]                    egress_port  [NUM_PORTS],
   input  action_t                       action       [NUM_PORTS],
 
   // Pop signals from cut-through controllers
@@ -62,7 +62,7 @@ module voq_buffer
   } voq_state_t;
 
   voq_state_t                      state          [NUM_PORTS];
-  logic [1:0]                      current_egress [NUM_PORTS];
+  logic [2:0]                      current_egress [NUM_PORTS];
   logic [$clog2(MAX_PKT_FLITS):0]  flit_count     [NUM_PORTS];
 
   always_ff @(posedge clk or negedge rst_n) begin
