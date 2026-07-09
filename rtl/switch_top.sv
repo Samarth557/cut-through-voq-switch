@@ -9,12 +9,16 @@
 //   wires all submodules. Contains no logic — purely structural.
 //   Uses pre-sliced intermediate arrays for clean instantiation.
 //
+// Features:
+//   - cfg_clk domain for TCAM programming, two-phase handshake CDC
+//
 // Submodules instantiated:
 //   - header_parser      x8  (one per ingress port)
 //   - flow_steering_table x8 (one per ingress port, shared TCAM write port)
 //   - voq_buffer         x1  (shared 8x8 FIFO array)
 //   - qos_arbiter        x8  (one per egress port)
 //   - cut_through_ctrl   x8  (one per egress port)
+//   - cdc_handshake_sync x1  (cfg->core TCAM write CDC)
 //==============================================================================
 
 module switch_top
@@ -25,6 +29,7 @@ module switch_top
 )(
   input  logic                                      clk,
   input  logic                                      rst_n,
+  input  logic                                      cfg_clk,
 
   // Ingress interfaces
   packet_if.slave                                   ingress_if [NUM_PORTS],
@@ -36,6 +41,7 @@ module switch_top
   input  logic                                      fst_wr_en,
   input  logic [$clog2(switch_pkg::TCAM_DEPTH)-1:0] fst_wr_addr,
   input  tcam_entry_t                               fst_wr_data,
+  output logic                                      cfg_wr_ready,   // CDC backpressure to cfg side
 
   // Error outputs
   output logic [NUM_PORTS-1:0]                      pkt_error
@@ -48,6 +54,11 @@ module switch_top
   // Flow steering outputs 
   logic [2:0]  fst_egress_port [NUM_PORTS];
   action_t     fst_action      [NUM_PORTS];
+
+  // TCAM write port after CDC (core_clk domain)
+  logic                                       core_wr_en;
+  logic [$clog2(switch_pkg::TCAM_DEPTH)-1:0]  core_wr_addr;
+  tcam_entry_t                                core_wr_data;
 
   // VOQ buffer outputs
   logic [FLIT_WIDTH-1:0]  flit_out  [NUM_PORTS][NUM_PORTS];
@@ -119,7 +130,21 @@ module switch_top
     end
   endgenerate
 
-  // Flow steering tables 
+  // Config-clock -> core-clock CDC for TCAM writes (two-phase toggle handshake)
+  cdc_handshake_sync u_cdc_fst_wr (
+    .cfg_clk        (cfg_clk),
+    .core_clk       (clk),
+    .rst_n          (rst_n),
+    .cfg_req_valid  (fst_wr_en),
+    .cfg_wr_addr    (fst_wr_addr),
+    .cfg_wr_data    (fst_wr_data),
+    .cfg_wr_ready   (cfg_wr_ready),
+    .core_wr_en     (core_wr_en),
+    .core_wr_addr   (core_wr_addr),
+    .core_wr_data   (core_wr_data)
+  );
+
+  // Flow steering tables
   genvar fst;
   generate
     for (fst = 0; fst < NUM_PORTS; fst++) begin : gen_fst
@@ -133,9 +158,9 @@ module switch_top
         .action        (fst_action[fst]),
         .hit           (),
         .miss          (),
-        .wr_en         (fst_wr_en),
-        .wr_addr       (fst_wr_addr),
-        .wr_data       (fst_wr_data)
+        .wr_en         (core_wr_en),
+        .wr_addr       (core_wr_addr),
+        .wr_data       (core_wr_data)
       );
     end
   endgenerate
